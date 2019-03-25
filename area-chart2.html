@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Exercise Portfolio</title>
+    <link href="css/style.css" rel="stylesheet" />
+  </head>
+
+  <body>
+
+    <header>
+      <!-- ADD YOUR NAME -->
+      <h1>Yutong Han: Exercise Portfolio</h1>
+    </header>
+
+    <div id="content">
+
+      <nav>
+        <ul>
+          <li><a href="index.html">Return to Main Page</a></li>
+        </ul>
+      </nav>
+
+      <main>
+
+        <h2>Google's Stock History: from 2004 to 2019</h2>
+
+        <p>This is monthly stock close information for Google, LLC (GOOG) from August 1th, in 2004 to March 1th, in 2019.</p>
+        <p>There are four critical timing, which are meaningful for the company. Firstly, Google announced the hiring of Morgan Stanley and Goldman Sachs Group to arrange an IPO in January 2004. Then, Google bought YouTube for $1.65 billion in October 2006. Later, Google launched the first public version of the mobile OS, in the form of the Android 1.0, on 23 September 2008. In October 2018, NY Times exposed that Google did not notify authories of the vulnerabilities in Google Plus, which exposed the data of up to 500,000 users.</p>
+
+        <!-- ADD YOUR VISUALIZATION HERE -->
+
+      </main>
+    </div>
+
+    <script src="js/d3.min.js"></script>
+    <script>
+
+      // add your script here
+      // OR
+      // add a link to a stand-alone script in the js folder
+      var w = window.innerWidth;
+      var h = window.innerHeight;
+
+      var margin = {
+        top: 60,
+        right: 60,
+        left: 60,
+        bottom: 60
+      };
+
+      var svg = d3.select("body")
+                  .append("svg");
+
+      svg.attr("width", w - margin.right)
+         .attr("height", h);
+
+      d3.csv("./data/GOOG.csv").then(function(data) {
+        var timeParser = d3.timeParse("%Y-%m-%d");
+        data.forEach(function(d){
+          d.date = timeParser(d.date);
+          d.close = +d.close;
+          // console.log(d.close);
+        })
+
+        var xScale = d3.scaleTime()
+                       .domain(d3.extent(data,function(d) {
+                         return d.date}))
+                       .range([0, (w - margin.left - margin.right)]);
+
+        var yScale = d3.scaleLinear()
+                       .domain(d3.extent(data,function(d) {
+                         return d.close}))
+                       .range([(h - margin.top - margin.bottom), 0]);
+
+      var area = d3.area()
+                  .x(function(d) {
+                    return xScale(d.date); })
+                  .y1(function(d) {
+                    return yScale(d.close);})
+                  .y0(function(d) { return yScale.range()[0]; });
+
+    svg.append("g")
+       .attr("transform", "translate(" + margin.left +"," + margin.top +")")
+       .append("path")
+       .datum(data)
+       .attr("class", "data-line2")
+       .attr("d", area);
+
+      var xAxis = d3.axisBottom()
+                    .scale(xScale)
+                    .ticks(10);
+      var yAxis = d3.axisLeft()
+                    .scale(yScale)
+                    .ticks(10);
+
+    svg.append("g")
+       .attr("transform", "translate(" + margin.left +"," + (h - margin.bottom) +")")
+       .attr("class", "xaxis")
+       .call(xAxis);
+
+    svg.append("g")
+       .attr("transform", "translate(" +margin.left +", " + margin.top +")")
+       .attr("class", "yaxis")
+       .call(yAxis)
+
+    //   var maxRate = data.filter(function(d){
+    //     var max = d3.max(data, function(d){
+    //       return d.close;
+    //     })
+    //     if( d.close == max){
+    //       return d.close;
+    //     }
+    //   });
+    //
+    // svg.selectAll("circle")
+    //    .data(maxRate)
+    //    .enter()
+    //    .append("circle")
+    //    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    //    .attr("cy", function(d){
+    //      return yScale(d.close)
+    //    })
+    //    .attr("r",1.5);
+    //
+    //   var maxRateX = xScale(maxRate[0].date);
+    //   var maxRateY = xScale(maxRate[0].close);
+      // console.log(maxRateX);
+
+    // svg.append("line")
+    //    .attr("class", "top-line")
+    //    .attr("transform", "translate(" + margin.left +", " + margin.top +")")
+    //    .attr("x1", "(maxRateX - 10)")
+    //    .attr("x2", "(maxRateX + 1)")
+    //    .attr("y1", "(maxRateY - 3)")
+    //    .attr("y2", "(maxRateY - 13)")
+    //
+    // svg.append("text")
+    //    .text("Stock at its Hightest Close, " + maxRate[0].close)
+    //    .attr("x",(maxRateX - 134))
+    //    .attr("y", (maxRateY - 14))
+    //    .attr("transform", "translate(" + margin.left +", " + margin.top +")");
+
+    var maxRate = data.filter(function(d){
+      var max = d3.max(data, function(d){
+        return d.close;
+      })
+      if (d.close == max){
+        return d.close;
+      }
+    });
+
+    svg.selectAll("circle")
+    .data(maxRate)
+    .enter()
+    .append("circle")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .attr("cx", function(d){
+      return xScale(d.date)
+    })
+    .attr("cy", function(d){
+      return yScale(d.close)
+    })
+    .attr("r",1.5);
+
+    var maxRateX = xScale(maxRate[0].date);
+    var maxRateY = yScale(maxRate[0].close);
+
+    // console.log(maxRateY);
+
+    var markCircle = ['2004-08', '2006-10', '2008-09', '2018-10'];
+    // 去掉月前的0
+    markCircle = markCircle.map(function(d) {return d.replace(/-0/i, '-');});
+
+    var circleRate = data.filter(function(d){
+     // 返回被标记的点
+        var dTemp = d.date.getFullYear() +  '-'  + (d.date.getMonth() + 1);
+        if(markCircle.indexOf(dTemp) > -1) {
+            return d.close;
+         }
+     });
+
+      // 需要标注线的数据
+      var markLine = ['2009-01', '2017-01'];
+      // 去掉月前的0
+      markLine = markLine.map(function(d) {return d.replace(/-0/i, '-');});
+
+      var lineRate = data.filter(function(d){
+          // 返回被标记的点
+          var dTemp = d.date.getFullYear() +  '-'  + (d.date.getMonth() + 1);
+          if(markLine.indexOf(dTemp) > -1) {
+              return d.close;
+          }
+      });
+
+      svg.selectAll("circle")
+         .data(circleRate)
+         .enter()
+         .append("circle")
+         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+         .attr("cx", function(d){
+           return xScale(d.date)
+         })
+         .attr("cy", function(d){
+           return yScale(d.close)
+         })
+         .attr("r",1.5);
+
+  svg.append("line")
+     .attr("class", "top-line")
+     .attr("transform", "translate(" + margin.left +", " + margin.top +")")
+     .attr("x1", "(maxRateX + 3)")
+     .attr("x2", "(maxRateX + 13)")
+     .attr("y1", "(maxRateY - 3)")
+     .attr("y2", "(maxRateY - 13)");
+
+  svg.append("text")
+     .text("Stock at its Highest Close, " + maxRate[0].close)
+     .attr("x", (maxRateX - 134))
+     .attr("y", (maxRateY - 14))
+     .attr("transform", "translate(" + margin.left +", " + margin.top +")");
+
+// const selectedYear = 1998
+
+  for(var i = 0, len = circleRate.length; i < len; i++){
+    var tempRateX = xScale(circleRate[i].date);
+    var tempRateY = yScale(circleRate[i].close);
+
+  svg.append("line")
+      .attr("class", "top-line")
+      .attr("transform", "translate(" + margin.left +", " + margin.top +")")
+      .attr("x1", (tempRateX + 3))
+      .attr("x2", (tempRateX + 13))
+      .attr("y1", (tempRateY - 3))
+      .attr("y2", (tempRateY - 13))
+      .style('stroke', 'red')
+      .style('stroke-width', 1);
+
+  svg.append("text")
+      .text("Stock at " + markCircle[i] + " Close")
+      .attr("x", (tempRateX - 60))
+      .attr("y", (tempRateY - 14))
+      .attr("transform", "translate(" + margin.left +", " + margin.top +")");
+}
+
+  for(var j = 0; j < lineRate.length; j++){
+    var tempLineX = xScale(lineRate[j].date);
+    var tempLineY = yScale(lineRate[j].close);
+
+ svg.append("text")
+      .text("the Start/ End of Obama Administration")
+      .attr("x", (tempLineX - 14))
+      .attr("y", (tempLineY - 4))
+      .attr("transform", "translate(" + margin.left +", " + margin.top +")");
+
+  svg.append("line")
+      .attr("transform", "translate(" + margin.left +", " + margin.top +")")
+      .attr("x1", (tempLineX))
+      .attr("x2", (tempLineX))
+      .attr("y1", (tempLineY))
+      .attr("y2", (h - margin.bottom - margin.top))
+      .style('stroke', 'red')
+      .style('stroke-dasharray', 5)
+      .style('stroke-width', 1);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    });
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+  </body>
+</html>
