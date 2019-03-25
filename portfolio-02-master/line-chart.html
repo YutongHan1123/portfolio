@@ -134,6 +134,39 @@
 
       // console.log(maxRateY);
 
+      var markCircle = ['1998-08', '2007-06', '2010-04', '2018-08'];
+      markCircle = markCircle.map(function(d) {return d.replace(/-0/i, '-');});
+
+      var circleRate = data.filter(function(d){       // 返回被标记的点
+          var dTemp = d.date.getFullYear() +  '-'  + (d.date.getMonth() + 1);
+          if(markCircle.indexOf(dTemp) > -1) {
+              return d.close;
+           }
+       });
+
+        var markLine = ['2009-01', '2017-01'];
+        markLine = markLine.map(function(d) {return d.replace(/-0/i, '-');});
+
+        var lineRate = data.filter(function(d){
+            var dTemp = d.date.getFullYear() +  '-'  + (d.date.getMonth() + 1);
+            if(markLine.indexOf(dTemp) > -1) {
+                return d.close;
+            }
+        });
+
+        svg.selectAll("circle")
+           .data(circleRate)
+           .enter()
+           .append("circle")
+           .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+           .attr("cx", function(d){
+             return xScale(d.date)
+           })
+           .attr("cy", function(d){
+             return yScale(d.close)
+           })
+           .attr("r",1.5);
+
     svg.append("line")
        .attr("class", "top-line")
        .attr("transform", "translate(" + margin.left +", " + margin.top +")")
@@ -143,18 +176,54 @@
        .attr("y2", "(maxRateY - 13)");
 
     svg.append("text")
-       .text("Stock at its Highest Close, " + maxRate[0].close)
-       .attr("x", (maxRateX - 134))
+       .text("at Highest Close, " + maxRate[0].close)
+       .attr("x", (maxRateX - 234))
        .attr("y", (maxRateY - 14))
        .attr("transform", "translate(" + margin.left +", " + margin.top +")");
 
 // const selectedYear = 1998
 
-if (d.date.selectedYear() =="1998" && d.date.selectedMonth() =="August") {
-  return d.date.selectedYear;
+    for(var i = 0, len = circleRate.length; i < len; i++){
+      var tempRateX = xScale(circleRate[i].date);
+      var tempRateY = yScale(circleRate[i].close);
+
+    svg.append("line")
+        .attr("class", "top-line")
+        .attr("transform", "translate(" + margin.left +", " + margin.top +")")
+        .attr("x1", (tempRateX - 1))
+        .attr("x2", (tempRateX - 13))
+        .attr("y1", (tempRateY - 3))
+        .attr("y2", (tempRateY - 13))
+        .style('stroke', 'red')
+        .style('stroke-width', 1);
+
+    svg.append("text")
+        .text("Stock at " + markCircle[i] + " Close")
+        .attr("x", (tempRateX - 100))
+        .attr("y", (tempRateY - 14))
+        .attr("transform", "translate(" + margin.left +", " + margin.top +")");
 }
 
+    for(var j = 0; j < lineRate.length; j++){
+      var tempLineX = xScale(lineRate[j].date);
+      var tempLineY = yScale(lineRate[j].close);
 
+   svg.append("text")
+        .text("the Start/ End of Obama Administration")
+        .attr("x", (tempLineX - 24))
+        .attr("y", (tempLineY - 14))
+        .attr("transform", "translate(" + margin.left +", " + margin.top +")");
+
+    svg.append("line")
+        .attr("transform", "translate(" + margin.left +", " + margin.top +")")
+        .attr("x1", (tempLineX))
+        .attr("x2", (tempLineX))
+        .attr("y1", (tempLineY))
+        .attr("y2", (h - margin.bottom - margin.top))
+        .style('stroke', 'red')
+        .style('stroke-dasharray', 5)
+        .style('stroke-width', 1);
+}
 
 
 
