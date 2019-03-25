@@ -15,6 +15,11 @@ body {
         stroke: rgb(85,174,243);
         stroke-width: 1px;
       }
+      .data-line2 {
+        fill: rgba(85,174,243,0.5);
+        stroke: rgb(85,174,243);
+        stroke-width: 1px;
+      }
       .mean-line {
         fill: none;
         stroke: rgb(204,60,45);

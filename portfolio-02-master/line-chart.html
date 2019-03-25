@@ -24,9 +24,11 @@
 
       <main>
 
-        <h2>AAPL's Stock History: from 1996 to 2019</h2>
+        <h2>Apple's Stock History: from 1996 to 2019</h2>
 
-        <p><!-- INFORMATION ABOUT YOUR VISUALIZATION: What is this about? --></p>
+        <p>This is monthly stock close information for Apple Inc.(AAPL) from January 1th, in 1996 to March 1th, in 2019.</p>
+        <p>There are three critical timing, which are meaningful for the company. Firstly, Apple Inc. introduced iMac in August, 1998. Then, they introduced iPhone and iPad by June, 2007 and April, 2010. Recently, Apple Inc. becomes a trillion-dollar company.</p>
+
 
         <!-- ADD YOUR VISUALIZATION HERE -->
 
@@ -45,7 +47,7 @@
       var margin = {
         top: 60,
         right: 60,
-        leeft: 60,
+        left: 60,
         bottom: 60
       };
 
@@ -61,6 +63,7 @@
           d.date = timeParser(d.date);
           d.close = +d.close;
           // console.log(d.close);
+          // console.log(d.date);
         })
 
         var xScale = d3.scaleTime()
@@ -85,6 +88,72 @@
        .datum(data)
        .attr("class", "data-line")
        .attr("d", line);
+
+       var xAxis = d3.axisBottom()
+                    .scale(xScale)
+                    .ticks(10);
+
+       var yAxis = d3.axisLeft()
+                   .scale(yScale)
+                   .ticks(10);
+
+    svg.append("g")
+       .attr("transform", "translate(" + margin.left + ", " + (h - margin.bottom) + ")")
+       .attr("class", "xaxis")
+       .call(xAxis);
+
+    svg.append("g")
+       .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+       .attr("class", "yaxis")
+       .call(yAxis);
+
+       var maxRate = data.filter(function(d){
+         var max = d3.max(data, function(d){
+           return d.close;
+         })
+         if (d.close == max){
+           return d.close;
+         }
+       });
+
+    svg.selectAll("circle")
+       .data(maxRate)
+       .enter()
+       .append("circle")
+       .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+       .attr("cx", function(d){
+         return xScale(d.date)
+       })
+       .attr("cy", function(d){
+         return yScale(d.close)
+       })
+       .attr("r",1.5);
+
+      var maxRateX = xScale(maxRate[0].date);
+      var maxRateY = yScale(maxRate[0].close);
+
+      // console.log(maxRateY);
+
+    svg.append("line")
+       .attr("class", "top-line")
+       .attr("transform", "translate(" + margin.left +", " + margin.top +")")
+       .attr("x1", "(maxRateX - 10)")
+       .attr("x2", "(maxRateX + 1)")
+       .attr("y1", "(maxRateY - 3)")
+       .attr("y2", "(maxRateY - 13)");
+
+    svg.append("text")
+       .text("Stock at its Highest Close, " + maxRate[0].close)
+       .attr("x", (maxRateX - 134))
+       .attr("y", (maxRateY - 14))
+       .attr("transform", "translate(" + margin.left +", " + margin.top +")");
+
+// const selectedYear = 1998
+
+if (d.date.selectedYear() =="1998" && d.date.selectedMonth() =="August") {
+  return d.date.selectedYear;
+}
+
 
 
 
