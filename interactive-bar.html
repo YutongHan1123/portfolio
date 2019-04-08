@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Exercise Portfolio</title>
+    <link href="css/style.css" rel="stylesheet" />
+  </head>
+
+  <body>
+
+    <header>
+      <!-- ADD YOUR NAME -->
+      <h1>Yutong Han: Exercise Portfolio</h1>
+    </header>
+
+    <div id="content">
+
+      <nav>
+        <ul>
+          <li><a href="index.html">Return to Main Page</a></li>
+        </ul>
+      </nav>
+
+      <main>
+
+        <h2><!-- VISUALIZATION TITLE --></h2>
+
+        <p><!-- INFORMATION ABOUT YOUR VISUALIZATION: What is this about? --></p>
+
+        <!-- ADD YOUR VISUALIZATION HERE -->
+
+      </main>
+    </div>
+
+    <script src="js/d3.min.js"></script>
+    <script>
+      // add your script here
+      // OR
+      // add a link to a stand-alone script in the js folder
+      var svg = d3.select("svg"),
+margin = {
+	top: 20,
+	right: 20,
+	bottom: 30,
+	left: 50
+},
+width = parseInt(d3.select('svg').attr("width")) - margin.left - margin.right,
+height = parseInt(d3.select("svg").attr("height")) - margin.top - margin.bottom,
+g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+console.log(width,height);
+var parseTime = d3.timeParse("%d-%b-%y");
+var x = d3.scaleBand()
+		.rangeRound([0, width])
+		.padding(0.1);
+var y = d3.scaleLinear()
+	.rangeRound([height, 0]);
+d3.tsv("data/spring-training.csv").then(function (data) {
+	console.log(data);
+	x.domain(data.map(function (d) {
+			return d.team;
+		}));
+	y.domain([0, d3.max(data, function (d) {
+				return Number(d.pct);
+			})]);
+	g.append("g")
+	.attr("transform", "translate(0," + height + ")")
+	.call(d3.axisBottom(x))
+	g.append("g")
+	.call(d3.axisLeft(y))
+	.append("text")
+	.attr("fill", "#000")
+	.attr("transform", "rotate(-90)")
+	.attr("y", 6)
+	.attr("dy", "0.71em")
+	.attr("text-anchor", "end")
+	.text("Column 1");
+	g.selectAll(".bar")
+	.data(data)
+	.enter().append("rect")
+	.attr("class", "bar")
+	.attr("x", function (d) {
+		return x(d.team);
+	})
+	.attr("y", function (d) {
+		return y(Number(d.pct));
+	})
+	.attr("width", x.bandwidth())
+	.attr("height", function (d) {
+		return height - y(Number(d.pct));
+	});
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+  </body>
+</html>
