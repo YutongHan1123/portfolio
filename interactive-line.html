@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Exercise Portfolio</title>
+    <link href="css/style.css" rel="stylesheet" />
+    <style>
+      .line {
+        fill: none;
+        stroke: black;
+        stroke-width: 1.5px;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <header>
+      <!-- ADD YOUR NAME -->
+      <h1>Yutong Han: Exercise Portfolio</h1>
+    </header>
+
+    <div id="content">
+
+      <nav>
+        <ul>
+          <li><a href="index.html">Return to Main Page</a></li>
+        </ul>
+      </nav>
+
+      <main>
+
+        <h2>all-time monthly stock data for the Walt Disney Company</h2>
+
+        <p><!-- INFORMATION ABOUT YOUR VISUALIZATION: What is this about? --></p>
+
+        <!-- ADD YOUR VISUALIZATION HERE -->
+
+      </main>
+    </div>
+
+    <div id="tooltip" class="hidden">
+      <p><strong>Important Label Heading</strong></p>
+      <p><span id="value">100</span>%</p>
+    </div>
+
+    <script src="js/d3.min.js"></script>
+    <script src="js/lodash.min.js"></script>
+    <script src="js/pi.js"></script>
+    <script>
+      // add your script here
+      // OR
+      // add a link to a stand-alone script in the js folder
+
+
+      var w = window.innerWidth;
+      var h = window.innerHeight;
+
+      var margin = {
+        top: 50,
+        right: 50,
+        left: 50,
+        bottom: 50
+      };
+
+      var dataDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+      // var x = d3.scaleOrdinal()
+      //           .domain(dataDays)
+      //           .range();
+
+      var svg = d3.select("body")
+                  .append("svg");
+
+      svg.attr("width", w - margin.right)
+           .attr("height", h);
+
+      d3.csv("./data/DIS.csv").then(function(data) {
+      var timeParser = d3.timeParse("%Y-%m-%d");
+      data.forEach(function(d) {
+          d.date = timeParser(d.date);
+          d.close = +d.close;
+      });
+      // 定义X轴标尺
+      var xScale = d3.scaleTime()
+                     .domain(d3.extent(data, function(d) {
+                       return d.date
+                     }))
+                     .range([0, (w - margin.left - margin.right)]);
+      // 定义Y轴标尺
+      var yScale = d3.scaleLinear()
+                     .domain(d3.extent(data, function(d) {
+                       return d.close
+                     }))
+                     .range([(h - margin.top - margin.bottom), 0]);
+
+      var line = d3.line()
+                   .x(function(d) {
+                     return xScale(d.date);
+                   })
+                   .y(function(d) {
+                     return yScale(d.close);
+                   });
+      //生成数据表
+      svg.append("g")
+         .attr("transform", "translate("+ margin.left +", " + margin.top +")")
+         .append("path")
+         .datum(data)
+         .attr("class", "data-line3")
+         .attr("d", line);
+      // 生成X轴
+      var xAxis = d3.axisBottom()
+                    .scale(xScale)
+                    .ticks(20);
+      //生成Y轴
+      var yAxis = d3.axisLeft()
+                    .scale(yScale)
+                    .ticks(10);
+    svg.append("g")//生成存放X轴的g标签
+       .attr("transform", "translate(" + margin.left + ", " + (h - margin.bottom) + ")")
+       .attr("class", "xaxis")
+       .call(xAxis);
+    svg.append("g")//生成存放Y轴的g标签
+       .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+       .attr("class", "yaxis")
+       .call(yAxis);
+      var maxRate = data.filter(function(d) {
+        var max = d.close;
+        if(d.close == max) {
+          return d.close;//返回每条数据的对应点(小红点)
+        }
+      });
+       svg.selectAll("circle")//给对应数据位置加点（小红点）
+          .data(maxRate)//将数据放入
+          .enter()
+          .append("circle")
+          .attr("transform", "translate(" + margin.left +", "+ margin.top +")")
+          .attr("cx", function(d) {
+            return xScale(d.date)//设置对应小红点X轴位置
+          })
+          .attr("cy", function(d) {
+            return yScale(d.close)//设置对应小红点Y轴位置
+          })
+          .attr("r", 0.2)//设置小红点大小
+           .on("mouseover", function (d) {//给小红点加鼠标移入事件
+               var maxRateX = xScale(d.date);//获取鼠标移入对应的数据
+               var maxRateY = yScale(d.close);
+               svg.append("line")//生成斜线
+                   .attr("class", "note-line")
+                   .attr("transform", "translate(" + margin.left +", "+ margin.top +")")
+                   .attr("x1",maxRateX+3)
+                   .attr("x2",maxRateX+13)
+                   .attr("y1",maxRateY-3)
+                   .attr("y2",maxRateY-13);
+               svg.append("text")//生成时间信息
+                   .text(d.date)
+                   .attr('class','text')
+                   .attr("x", (maxRateX+10))
+                   .attr("y", (maxRateY-10))
+                   .attr("transform", "translate(" + margin.left +", " + margin.top +")")
+
+           })
+           .on("mouseout", function(d){//鼠标移出事件
+               svg.selectAll('.note-line').remove();//删除移入时创建的斜线
+               svg.selectAll('.text').remove();//删除移入时创建的时间数据
+           })
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+  </body>
+</html>
