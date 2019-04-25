@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Exercise Portfolio</title>
+    <link href="css/style.css" rel="stylesheet" />
+    <style>
+
+    </style>
+  </head>
+
+  <body>
+
+    <header>
+      <!-- ADD YOUR NAME -->
+      <h1>Yutong Han: Exercise Portfolio</h1>
+    </header>
+
+    <div id="content">
+
+      <nav>
+        <ul>
+          <li><a href="index.html">Return to Main Page</a></li>
+        </ul>
+      </nav>
+
+      <main>
+
+        <h2>locations of the Seven Ancient and Modern Wonders of the world</h2>
+
+        <p>There are 14 locations of the Seven Ancient and Modern Wonders of the world. Move your mouse to hover the circle to see more info about them.</p>
+
+        <!-- ADD YOUR VISUALIZATION HERE -->
+
+      </main>
+    </div>
+    <div class="map"></div>
+    <div id="tooltip" class="hidden">
+      <p><strong>Important Label Heading</strong></p>
+      <p><span id="value">100</span>%</p>
+    </div>
+
+    <script src="js/d3.js"></script>
+    <script>
+    var svg = d3.select(".map").append("svg");
+    var w = 900, h = 500;
+    var margin = {
+      top: 50,
+      right: 50,
+      left: 50,
+      bottom: 50
+    };
+
+    var projection = d3.geoMercator();
+    var path = d3.geoPath().projection(projection);
+
+    var color_domain = [0, 3, 6, 9, 12];
+    var colors = d3.scaleThreshold()
+                   .domain(color_domain)
+                   .range(d3.schemeBlues[6]);
+
+    var ext_color_domain = [0, 3, 6, 9, 12];
+
+    var lgw = 20, lgh = 20;
+
+    d3.json("data/geojson/world.json").then(function(woMap) {
+      d3.csv("data/seven-ancient-wonders.csv").then(function(data) {
+        d3.csv("data/seven-ancient-wonders.csv").then(function(places) {
+          d3.csv("data/seven-modern-wonders.csv").then(function(modern) {
+          var woFeatures = woMap.features;
+          data.forEach(function(d) {
+            var wonderName = d.wonder;
+            var constructedName = d.constructed;
+            var buildersName = d.builders;
+            var destroyedName = d.destroyed;
+          });
+
+          places.forEach(function(p) {
+            p.longitude = +p.longitude;
+            p.latitude = +p.latitude;
+          });
+
+          modern.forEach(function(m) {
+            m.longitude = +m.longitude;
+            m.latitude = +m.latitude;
+            var wonderName2 = modern.wonder;
+            var constructedName2 = modern.constructed;
+            var buildersName2 = modern.builders;
+            var destroyedName2 = modern.destroyed;
+          });
+
+        svg.attr("width", w)
+        .attr("height", h);
+
+        svg.selectAll("path")
+        .data(woFeatures)
+        .enter()
+        .append("path")
+        .attr("d", path)
+        .attr("fill", "#ccc")
+        .attr("stroke", "#fff")
+        .attr("stroke-width", "2px");
+
+        svg.selectAll("circle")
+        .data(places)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d) {
+        if(projection([d.longitude, d.latitude])) {
+         return projection([d.longitude, d.latitude])[0]
+        }
+        })
+        .attr("cy", function(d) {
+        if(projection([d.longitude, d.latitude])) {
+         return projection([d.longitude, d.latitude])[1]
+        }
+        })
+        .attr("r", 3)
+        .on("mouseover",function(d){
+          var currentX = projection([d.longitude, d.latitude])[0];
+          var currentY = projection([d.longitude, d.latitude])[1];
+          svg.append("line")//生成斜线
+              .attr("class", "note-line")
+              .attr("transform", "translate(" + margin.left +", "+ margin.top +")")
+              .attr("x1",currentX-50)
+              .attr("x2",currentX-30)
+              .attr("y1",currentY-50)
+              .attr("y2",currentY-13);
+          svg.append("text")//生成时间信息
+              .text(d.wonder + "," + d.constructed + d.builders + d.destroyed)
+              .attr('class','text')
+              .attr("x", (currentX-30))
+              .attr("y", (currentY-10))
+              .attr("transform", "translate(" + margin.left +", " + margin.top +")")
+        })
+        .on("mouseout",function(d){
+          svg.selectAll('.note-line').remove();//删除移入时创建的斜线
+          svg.selectAll('.text').remove();
+        });
+
+        svg.selectAll("circle2")
+              .data(modern)
+              .enter()
+              .append("circle")
+              .attr("cx", function(d) {
+                 if(projection([d.longitude, d.latitude])) {
+                  return projection([d.longitude, d.latitude])[0]
+                 }
+              })
+              .attr("cy", function(d) {
+                 if(projection([d.longitude, d.latitude])) {
+                  return projection([d.longitude, d.latitude])[1]
+                 }
+              })
+              .attr("r", 3)
+              .on("mouseover",function(d){
+                var currentX2 = projection([d.longitude, d.latitude])[0];
+                var currentY2 = projection([d.longitude, d.latitude])[1];
+                svg.append("line")//生成斜线
+                    .attr("class", "note-line")
+                    .attr("transform", "translate(" + margin.left +", "+ margin.top +")")
+                    .attr("x1",currentX2-50)
+                    .attr("x2",currentX2-20)
+                    .attr("y1",currentY2-50)
+                    .attr("y2",currentY2-13);
+                svg.append("text")//生成时间信息
+                    .text(d.wonder + "," + d.constructed)
+                    .attr('class','text')
+                    .attr("x", (currentX2-20))
+                    .attr("y", (currentY2-10))
+                    .attr("transform", "translate(" + margin.left +", " + margin.top +")")
+              })
+              .on("mouseout",function(d){
+                svg.selectAll('.note-line').remove();//删除移入时创建的斜线
+                svg.selectAll('.text').remove();
+              });
+
+      });
+    });
+  });
+
+
+// d3.csv("data/seven-modern-wonders.csv").then(function(data) {
+//   d3.csv("data/seven-modern-wonders.csv").then(function(placest) {
+//
+//     placest.forEach(function(p) {
+//       p.longitude = +p.longitude;
+//       p.latitude = +p.latitude;
+//     });
+//
+//     svg.selectAll("circle")
+//           .data(placest)
+//           .enter()
+//           .append("circle")
+//           .attr("cx", function(d) {
+//              if(projection([d.longitude, d.latitude])) {
+//               return projection([d.longitude, d.latitude])[0]
+//              }
+//           })
+//           .attr("cy", function(d) {
+//              if(projection([d.longitude, d.latitude])) {
+//               return projection([d.longitude, d.latitude])[1]
+//              }
+//           })
+//           .attr("r", 3);
+//
+//         });
+//       });
+
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      // add a link to a stand-alone script in the js folder
+    </script>
+  </body>
+</html>

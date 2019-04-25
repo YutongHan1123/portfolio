@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Exercise Portfolio</title>
+    <link href="css/style.css" rel="stylesheet" />
+  </head>
+
+
+  <body>
+
+    <header>
+      <!-- ADD YOUR NAME -->
+      <h1>Yutong Han: Exercise Portfolio</h1>
+    </header>
+
+    <div id="content">
+
+      <nav>
+        <ul>
+          <li><a href="index.html">Return to Main Page</a></li>
+        </ul>
+      </nav>
+
+      <main>
+
+        <h2>Apple's Stock History: from 1996 to 2019</h2>
+
+        <p>This is monthly stock close information for Apple Inc.(AAPL) from January 1th, in 1996 to March 1th, in 2019.</p>
+        <p>There are three critical timing, which are meaningful for the company. Firstly, Apple Inc. introduced iMac in August, 1998. Then, they introduced iPhone and iPad by June, 2007 and April, 2010. Recently, Apple Inc. becomes a trillion-dollar company.</p>
+
+
+        <!-- ADD YOUR VISUALIZATION HERE -->
+
+      </main>
+    </div>
+
+    <script src="js/d3.min.js"></script>
+    <script>
+
+      // add your script here
+      // OR
+      // add a link to a stand-alone script in the js folder
+      var w = window.innerWidth;
+      var h = window.innerHeight;
+
+      var margin = {
+        top: 60,
+        right: 60,
+        left: 60,
+        bottom: 60
+      };
+
+      var svg = d3.select("body")
+                  .append("svg");
+
+      svg.attr("width", w - margin.right)
+         .attr("height", h);
+
+      d3.csv("./data/AAPL.csv").then(function(data) {
+        var timeParser = d3.timeParse("%Y-%m-%d");
+        data.forEach(function(d){
+          d.date = timeParser(d.date);
+          d.close = +d.close;
+          // console.log(d.close);
+          // console.log(d.date);
+        })
+
+        var xScale = d3.scaleTime()
+                       .domain(d3.extent(data,function(d) {
+                         return d.date}))
+                       .range([0, (w - margin.left - margin.right)]);
+
+        var yScale = d3.scaleLinear()
+                       .domain(d3.extent(data,function(d) {
+                         return d.close}))
+                       .range([(h - margin.top - margin.bottom), 0]);
+
+      var line = d3.line()
+                  .x(function(d) {
+                    return xScale(d.date); })
+                  .y(function(d) {
+                    return yScale(d.close);});
+
+    svg.append("g")
+       .attr("transform", "translate(" + margin.left +"," + margin.top +")")
+       .append("path")
+       .datum(data)
+       .attr("class", "data-line")
+       .attr("d", line);
+
+       var xAxis = d3.axisBottom()
+                    .scale(xScale)
+                    .ticks(10);
+
+       var yAxis = d3.axisLeft()
+                   .scale(yScale)
+                   .ticks(10);
+
+    svg.append("g")
+       .attr("transform", "translate(" + margin.left + ", " + (h - margin.bottom) + ")")
+       .attr("class", "xaxis")
+       .call(xAxis);
+
+    svg.append("g")
+       .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+       .attr("class", "yaxis")
+       .call(yAxis);
+
+       var maxRate = data.filter(function(d){
+         var max = d3.max(data, function(d){
+           return d.close;
+         })
+         if (d.close == max){
+           return d.close;
+         }
+       });
+
+    svg.selectAll("circle")
+       .data(maxRate)
+       .enter()
+       .append("circle")
+       .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+       .attr("cx", function(d){
+         return xScale(d.date)
+       })
+       .attr("cy", function(d){
+         return yScale(d.close)
+       })
+       .attr("r",1.5);
+
+      var maxRateX = xScale(maxRate[0].date);
+      var maxRateY = yScale(maxRate[0].close);
+
+      // console.log(maxRateY);
+
+      var markCircle = ['1998-08', '2007-06', '2010-04', '2018-08'];
+      markCircle = markCircle.map(function(d) {return d.replace(/-0/i, '-');});
+
+      var circleRate = data.filter(function(d){
+          var dTemp = d.date.getFullYear() +  '-'  + (d.date.getMonth() + 1);
+          if(markCircle.indexOf(dTemp) > -1) {
+              return d.close;
+           }
+       });
+
+        var markLine = ['2009-01', '2017-01'];
+        markLine = markLine.map(function(d) {return d.replace(/-0/i, '-');});
+
+        var lineRate = data.filter(function(d){
+            var dTemp = d.date.getFullYear() +  '-'  + (d.date.getMonth() + 1);
+            if(markLine.indexOf(dTemp) > -1) {
+                return d.close;
+            }
+        });
+
+        svg.selectAll("circle")
+           .data(circleRate)
+           .enter()
+           .append("circle")
+           .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+           .attr("cx", function(d){
+             return xScale(d.date)
+           })
+           .attr("cy", function(d){
+             return yScale(d.close)
+           })
+           .attr("r",1.5);
+
+    svg.append("line")
+       .attr("class", "top-line")
+       .attr("transform", "translate(" + margin.left +", " + margin.top +")")
+       .attr("x1", "(maxRateX - 10)")
+       .attr("x2", "(maxRateX + 1)")
+       .attr("y1", "(maxRateY - 3)")
+       .attr("y2", "(maxRateY - 13)");
+
+    svg.append("text")
+       .text("at Highest Close, " + maxRate[0].close)
+       .attr("x", (maxRateX - 234))
+       .attr("y", (maxRateY - 14))
+       .attr("transform", "translate(" + margin.left +", " + margin.top +")");
+
+
+
+    for(var i = 0, len = circleRate.length; i < len; i++){
+      var tempRateX = xScale(circleRate[i].date);
+      var tempRateY = yScale(circleRate[i].close);
+
+    svg.append("line")
+        .attr("class", "top-line")
+        .attr("transform", "translate(" + margin.left +", " + margin.top +")")
+        .attr("x1", (tempRateX - 1))
+        .attr("x2", (tempRateX - 13))
+        .attr("y1", (tempRateY - 3))
+        .attr("y2", (tempRateY - 13))
+        .style('stroke', 'red')
+        .style('stroke-width', 1);
+
+    svg.append("text")
+        .text("Stock at " + markCircle[i] + " Close")
+        .attr("x", (tempRateX - 100))
+        .attr("y", (tempRateY - 14))
+        .attr("transform", "translate(" + margin.left +", " + margin.top +")");
+}
+
+    for(var j = 0; j < lineRate.length; j++){
+      var tempLineX = xScale(lineRate[j].date);
+      var tempLineY = yScale(lineRate[j].close);
+
+   svg.append("text")
+        .text("the Start/ End of Obama Administration")
+        .attr("x", (tempLineX - 74))
+        .attr("y", (tempLineY + 4))
+        .attr("transform", "translate(" + margin.left +", " + margin.top +")");
+
+    svg.append("line")
+        .attr("transform", "translate(" + margin.left +", " + margin.top +")")
+        .attr("x1", (tempLineX))
+        .attr("x2", (tempLineX))
+        .attr("y1", (tempLineY))
+        .attr("y2", (h - margin.bottom - margin.top))
+        .style('stroke', 'red')
+        .style('stroke-dasharray', 5)
+        .style('stroke-width', 1);
+}
+
+
+
+
+
+
+
+
+
+      })
+
+
+    </script>
+    <p>
+
+
+
+
+
+
+    </p>
+  </body>
+</html>

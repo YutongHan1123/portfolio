@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Exercise Portfolio</title>
+    <link href="css/style.css" rel="stylesheet" />
+    <style>
+    </style>
+  </head>
+
+  <body>
+
+    <header>
+      <!-- ADD YOUR NAME -->
+      <h1>Yutong Han: Exercise Portfolio</h1>
+    </header>
+
+    <div id="content">
+
+      <nav>
+        <ul>
+          <li><a href="index.html">Return to Main Page</a></li>
+        </ul>
+      </nav>
+
+      <main>
+
+        <h2>the Percentage of Veteran in each State</h2>
+
+        <p>This is a choropleth map of total veteran percentage of each state in United.
+          Alaska has largest population percentage of veterans, which is 11.9%.
+          New York has least population percentage of veterans, which is 4.5%.
+        </p>
+
+        <!-- ADD YOUR VISUALIZATION HERE -->
+
+      </main>
+    </div>
+    <div class="map">
+    </div>
+    <script src="js/d3.js"></script>
+    <script>
+    var svg = d3.select(".map").append("svg");
+    var w = 900, h = 500;
+
+    var projection = d3.geoAlbersUsa();
+    var path = d3.geoPath().projection(projection);
+
+    var color_domain = [0, 3, 6, 9, 12];
+    var colors = d3.scaleThreshold()
+                   .domain(color_domain)
+                   .range(d3.schemeBlues[6]);
+
+    var legend_labels = ["0","3","6","9","12"];
+    var ext_color_domain = [0, 3, 6, 9, 12];
+
+    var lgw = 20, lgh = 20;
+
+    d3.json("data/geojson/us-states.json").then(function(usMap) {
+      d3.csv("data/united-states-veterans.csv").then(function(data) {
+          var usaFeatures = usMap.features;
+          data.forEach(function(d) {
+            var stateName = d.state;
+            var population = +d.veteran_pct;
+            usaFeatures.forEach(function(u) {
+              var usaState = u.properties.name;
+              if (usaState == stateName) {
+                u.properties.veteran_pct = population;
+              }
+            });
+          });
+
+  svg.attr("width", w)
+     .attr("height", h);
+
+  svg.selectAll("path")
+     .data(usaFeatures)
+     .enter()
+     .append("path")
+     .attr("d", path)
+     .attr("fill", function(d) {
+           if(d.properties.veteran_pct) {
+             return colors(d.properties.veteran_pct);
+           } else {
+             return "#ccc";
+           }
+         })
+     .attr("stroke", "#fff")
+     .attr("stroke-width", "2px");
+
+  var legend = svg.selectAll("g.legend")
+                  .data(ext_color_domain)
+                  .enter().append("g")
+                  .attr("class", "legend");
+
+  legend.append("rect")
+        .attr("x", 20)
+        .attr("y", function(d, i){ return h - (i*lgh) - 2*lgh;})
+        .attr("width", lgw)
+        .attr("height", lgh)
+        .style("fill", function(d, i) { return colors(d); })
+        .style("opacity", 0.8);
+
+  legend.append("text")
+        .attr("x", 50)
+        .attr("y", function(d, i){
+          return h - (i*lgh) - lgh - 4;
+        })
+        .text(function(d, i){
+          return legend_labels[i];
+        });
+      });
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      // add a link to a stand-alone script in the js folder
+    </script>
+  </body>
+</html>
