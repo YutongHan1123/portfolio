@@ -99,7 +99,7 @@
               var max = d3.max(y_data);
               var height_ = (max-y_data[i])*y_height.toFixed(2);
 
-              return height-margin.bottom*0.85-y_data[i]*y_height.toFixed(2);
+              return height-margin.bottom-y_data[i]*y_height.toFixed(2);
             })
             .attr("width",function(d){
                 return xScale.step()-rectPadding;//计算矩形宽度
@@ -195,7 +195,7 @@
                     var max = d3.max(y_data);
                     var height_ = (max-y_data[i])*y_height.toFixed(2);
                     //计算矩形高度并返回
-                    return height-margin.bottom*0.2-y_data[i]*y_height.toFixed(2);
+                    return height-margin.bottom*0.5-y_data[i]*y_height.toFixed(2);
                   })
                   .attr("width",function(d){
                     return xScale.step()-rectPadding;
@@ -271,7 +271,7 @@
                     var max = d3.max(y_data);
                     var height_ = (max-y_data[i])*y_height.toFixed(2);
                     //计算矩形高度并返回
-                    return height-margin.bottom*0.85-y_data[i]*y_height.toFixed(2);
+                    return height-margin.bottom-y_data[i]*y_height.toFixed(2);
                   })
                   .attr("width",function(d){
                     return xScale.step()-rectPadding;
