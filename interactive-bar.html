@@ -111,7 +111,7 @@
                 var max = d3.max(y_data);
                 var height_ = (max-y_data[i])*y_height.toFixed(2);
                 //计算矩形高度并返回
-                return height-margin.top-margin.bottom-height_;
+                return height-margin.top*0.85-margin.bottom-height_;
             })
             // .attr("transform","translate("+0+","+(height-margin.top-margin.bottom)+")")
             // .attr("transform","rotate(180 0 0)" )
@@ -195,7 +195,7 @@
                     var max = d3.max(y_data);
                     var height_ = (max-y_data[i])*y_height.toFixed(2);
                     //计算矩形高度并返回
-                    return height-margin.bottom*0.5-y_data[i]*y_height.toFixed(2);
+                    return height-margin.bottom*0.85-y_data[i]*y_height.toFixed(2);
                   })
                   .attr("width",function(d){
                     return xScale.step()-rectPadding;
@@ -280,7 +280,7 @@
                     var y_height = (height-margin.top-margin.bottom)/data_count;
                     var max = d3.max(y_data);
                     var height_ = (max-y_data[i])*y_height.toFixed(2);
-                    return height-margin.top-margin.bottom-height_;
+                    return height-margin.top*0.85-margin.bottom-height_;
                   })
                   .attr("fill",'#FFA41F');
           //绘制文字
